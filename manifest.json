@@ -1,0 +1,22 @@
+{
+    "name": "Flatsome Compatible",
+    "version": "1.0.0",
+    "description": "Tích hợp UX Builder (Flatsome-style drag-and-drop editor) cho Jankx Theme, tương thích cấu trúc Flatsome.",
+    "author": "Jankx",
+    "extension_id": "flatsome-compatible",
+    "context": [
+        "admin",
+        "frontend",
+        "ajax",
+        "rest"
+    ],
+    "caller": {
+        "file": "FlatsomeCompatibleExtension.php",
+        "class": "Jankx\\Extensions\\FlatsomeCompatible\\FlatsomeCompatibleExtension",
+        "method": "init"
+    },
+    "requirements": {
+        "php": ">=7.4"
+    },
+    "auto_activate": true
+}

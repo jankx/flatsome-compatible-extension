@@ -1,0 +1,20 @@
+{
+    "name": "jankx/flatsome-compatible",
+    "description": "UX Builder (Flatsome-style drag-and-drop editor) for Jankx Theme.",
+    "type": "jankx-extension",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Puleeno Nguyen",
+            "email": "puleeno@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jankx\\Extensions\\FlatsomeCompatible\\": "includes/"
+        }
+    }
+}
