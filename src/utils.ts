@@ -1,21 +1,13 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { UXElement, ElementType, FLATSOME_SELF_CLOSING, FLATSOME_CONTAINERS } from './types';
 
-import { UXElement, ElementType } from './types';
-
-// Generate a clean solid ID
 export function generateId(): string {
   return `${Math.random().toString(36).substring(2, 9)}`;
 }
 
-// Deeply clonse UXElement array
 export function deepCloneElements(elements: UXElement[]): UXElement[] {
   return JSON.parse(JSON.stringify(elements));
 }
 
-// Find item and its parent
 export function findElementWithParent(
   elements: UXElement[],
   id: string,
@@ -33,380 +25,243 @@ export function findElementWithParent(
   return null;
 }
 
-// Find only item
 export function findElement(elements: UXElement[], id: string): UXElement | null {
   const result = findElementWithParent(elements, id);
   return result ? result.element : null;
 }
 
-// Create new element with default properties
 export function createElementTemplate(type: ElementType): UXElement {
   const id = generateId();
   switch (type) {
     case 'section':
       return {
-        id,
-        type,
-        label: 'Section',
-        props: {
-          bg_color: '#f8fafc',
-          bg_image: '',
-          padding_top: '60px',
-          padding_bottom: '60px',
-          overlay: 'rgba(0,0,0,0)',
-          border_width: '0px',
-          border_color: '#cbd5e1',
-          class: '',
-        },
-        children: [
-          {
-            id: generateId(),
-            type: 'row',
-            label: 'Row',
-            props: {
-              gutter: 'medium', // small, medium, large, collapse
-              width: 'container', // container, full-width
-              class: '',
-            },
-            children: [
-              {
-                id: generateId(),
-                type: 'column',
-                label: 'Column',
-                props: {
-                  span: 6,
-                  bg_color: '',
-                  padding: '20px',
-                  text_align: 'left',
-                  animation: 'none',
-                  class: '',
-                },
-                children: [
-                  {
-                    id: generateId(),
-                    type: 'text',
-                    label: 'Text',
-                    props: {
-                      text: '<h2>Create Stunning Designs</h2><p>Double click here to customize these texts instantly. UX Builder gives you total design superpowers.</p>',
-                      class: '',
-                    },
-                    children: [],
-                  },
-                ],
-              },
-              {
-                id: generateId(),
-                type: 'column',
-                label: 'Column',
-                props: {
-                  span: 6,
-                  bg_color: '',
-                  padding: '20px',
-                  text_align: 'left',
-                  animation: 'none',
-                  class: '',
-                },
-                children: [
-                  {
-                    id: generateId(),
-                    type: 'button',
-                    label: 'Button',
-                    props: {
-                      text: 'Get Started Today',
-                      link: '#',
-                      color: 'primary', // primary, secondary, alert, success
-                      style: 'filled', // filled, outline, round, underline
-                      size: 'medium', // small, medium, large
-                      align: 'left',
-                      class: '',
-                    },
-                    children: [],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
+        id, type, label: 'Section',
+        props: { bg_color: '#f8fafc', bg: '', bg_overlay: '', padding: '60px 0px 60px 0px', dark: false, class: '', visibility: '' },
+        children: [createElementTemplate('row')],
       };
 
     case 'row':
       return {
-        id,
-        type,
-        label: 'Row',
-        props: {
-          gutter: 'medium',
-          width: 'container',
-          class: '',
-        },
+        id, type, label: 'Row',
+        props: { gap: 'normal', width: '', custom_width: '', h_align: 'left', v_align: '', col_bg: '', col_bg_radius: '', depth: '', depth_hover: '', class: '', visibility: '' },
         children: [
-          {
-            id: generateId(),
-            type: 'column',
-            label: 'Column (1/2)',
-            props: { span: 6 },
-            children: [],
-          },
-          {
-            id: generateId(),
-            type: 'column',
-            label: 'Column (1/2)',
-            props: { span: 6 },
-            children: [],
-          },
+          { id: generateId(), type: 'col', label: 'Column 1/2', props: { span: 6, span__sm: 12, padding: '15px', text_align: 'left' }, children: [] },
+          { id: generateId(), type: 'col', label: 'Column 2/2', props: { span: 6, span__sm: 12, padding: '15px', text_align: 'left' }, children: [] },
         ],
       };
 
-    case 'column':
+    case 'row_inner':
       return {
-        id,
-        type,
-        label: 'Column',
-        props: {
-          span: 4,
-          bg_color: '',
-          padding: '15px',
-          text_align: 'left',
-          animation: 'none',
-          class: '',
-        },
+        id, type, label: 'Row Inner',
+        props: { gap: 'normal', class: '' },
+        children: [
+          { id: generateId(), type: 'col_inner', label: 'Inner Col', props: { span: 12, padding: '15px' }, children: [] },
+        ],
+      };
+
+    case 'col':
+      return {
+        id, type, label: 'Column',
+        props: { span: 4, span__sm: 12, span__md: '', padding: '15px', padding__sm: '', padding__md: '', bg: '', bg_color: '', bg_radius: '', text_align: 'left', text_color: '', animate: '', class: '', visibility: '' },
         children: [],
+      };
+
+    case 'col_inner':
+      return {
+        id, type, label: 'Inner Column',
+        props: { span: 12, span__sm: 12, padding: '15px', text_align: 'left', class: '' },
+        children: [],
+      };
+
+    case 'ux_banner':
+      return {
+        id, type, label: 'Banner',
+        props: { bg: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80', bg_color: '', bg_overlay: 'rgba(0,0,0,0.3)', height: '400px', container_width: '', parallax: '', hover: 'zoom', slide_effect: '', text_color: 'light', text_align: 'center', text_pos: 'center', text_width: '60', padding: '30px', animate: '', link: '', target: '', class: '', visibility: '' },
+        children: [createElementTemplate('text_box')],
+      };
+
+    case 'text_box':
+      return {
+        id, type, label: 'Text Box',
+        props: { position_x: '50', position_y: '50', width: '60', scale: '', text_align: 'center', text_color: 'light', animate: '', class: '', visibility: '' },
+        children: [createElementTemplate('text')],
       };
 
     case 'text':
+    case 'ux_text':
       return {
-        id,
-        type,
-        label: 'Text',
-        props: {
-          text: '<h3>Awesome Title</h3><p>Enter your professional description text block right here inline or via the Inspector editor sidebar.</p>',
-          class: '',
-        },
+        id, type, label: 'Text',
+        props: { text: '<h2>Heading Here</h2><p>Your content goes here.</p>', class: '', visibility: '' },
         children: [],
       };
 
-    case 'image':
+    case 'title':
       return {
-        id,
-        type,
-        label: 'Image',
-        props: {
-          url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
-          width: '100%',
-          height: 'auto',
-          align: 'center',
-          radius: '4px',
-          hover_effect: 'zoom', // none, zoom, fade, glow
-          link: '',
-          class: '',
-        },
+        id, type, label: 'Title',
+        props: { text: 'Section Title', style: 'lined', size: 'normal', sub_text: '', color: '', class: '' },
+        children: [],
+      };
+
+    case 'ux_image':
+      return {
+        id, type, label: 'Image',
+        props: { id: '', image_size: 'full', width: '', height: '', margin: '', lightbox: true, caption: true, image_hover: 'zoom', image_overlay: '', depth: '', depth_hover: '', animate: '', link: '', target: '', class: '', visibility: '' },
         children: [],
       };
 
     case 'button':
       return {
-        id,
-        type,
-        label: 'Button',
-        props: {
-          text: 'Explore Works',
-          link: '#',
-          color: 'primary',
-          style: 'filled',
-          size: 'medium',
-          align: 'center',
-          class: '',
-        },
+        id, type, label: 'Button',
+        props: { text: 'Button', link: '#', style: '', color: 'primary', size: 'normal', radius: '', expand: false, icon: '', icon_pos: 'right', depth: '', depth_hover: '', animate: '', class: '', visibility: '' },
         children: [],
       };
 
-    case 'slider':
+    case 'featured_box':
       return {
-        id,
-        type,
-        label: 'Slider',
-        props: {
-          height: '400px',
-          arrows: true,
-          bullets: true,
-          auto_play: false,
-          class: '',
-        },
+        id, type, label: 'Feature Box',
+        props: { img: '', img_width: '48', pos: 'top', title: 'Feature Title', text: 'Feature description', icon: '', icon_color: '#3b82f6', icon_size: '32px', link: '', target: '', depth: '', depth_hover: '', animate: '', bg_color: '', padding: '15px', class: '', visibility: '' },
+        children: [],
+      };
+
+    case 'ux_slider':
+      return {
+        id, type, label: 'Slider',
+        props: { style: 'normal', slide_width: '', slide_align: 'left', bg_color: '', margin: '', infinitive: true, freescroll: false, draggable: true, hide_nav: false, nav_pos: '', nav_size: 'normal', arrows: true, nav_style: 'circle', nav_color: 'dark', bullets: true, auto_slide: false, timer: 4000, class: '', visibility: '' },
         children: [
-          {
-            id: generateId(),
-            type: 'section',
-            label: 'Slide 1',
-            props: {
-              bg_color: '#1e293b',
-              padding_top: '100px',
-              padding_bottom: '100px',
-              overlay: 'rgba(0,0,0,0.3)',
-              class: '',
-            },
-            children: [
-              {
-                id: generateId(),
-                type: 'row',
-                label: 'Row',
-                props: { gutter: 'medium', width: 'container' },
-                children: [
-                  {
-                    id: generateId(),
-                    type: 'column',
-                    label: 'Column',
-                    props: { span: 12, text_align: 'center' },
-                    children: [
-                      {
-                        id: generateId(),
-                        type: 'text',
-                        label: 'Text',
-                        props: {
-                          text: '<h1 style="color:#ffffff;">Slide Title 1</h1><p style="color:#e2e8f0;">Flick through multiple slides seamlessly with layout options.</p>',
-                        },
-                        children: [],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            id: generateId(),
-            type: 'section',
-            label: 'Slide 2',
-            props: {
-              bg_color: '#0f172a',
-              padding_top: '100px',
-              padding_bottom: '100px',
-              overlay: 'rgba(0,0,0,0.4)',
-              class: '',
-            },
-            children: [
-              {
-                id: generateId(),
-                type: 'row',
-                label: 'Row',
-                props: { gutter: 'medium', width: 'container' },
-                children: [
-                  {
-                    id: generateId(),
-                    type: 'column',
-                    label: 'Column',
-                    props: { span: 12, text_align: 'center' },
-                    children: [
-                      {
-                        id: generateId(),
-                        type: 'text',
-                        label: 'Text',
-                        props: {
-                          text: '<h1 style="color:#ffffff;">Fabulous Slide 2</h1><p style="color:#e2e8f0;">Endless creative structures, banners and overlays.</p>',
-                        },
-                        children: [],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
+          { id: generateId(), type: 'section', label: 'Slide 1', props: { bg_color: '#1e293b', padding: '100px 0px 100px 0px', bg_overlay: 'rgba(0,0,0,0.3)', dark: true }, children: [createDefaultRowWithText('Slide 1 Title', 'Slide description here.')] },
+          { id: generateId(), type: 'section', label: 'Slide 2', props: { bg_color: '#0f172a', padding: '100px 0px 100px 0px', bg_overlay: 'rgba(0,0,0,0.4)', dark: true }, children: [createDefaultRowWithText('Slide 2 Title', 'Another slide description.')] },
         ],
       };
 
-    case 'gallery':
+    case 'ux_gallery':
       return {
-        id,
-        type,
-        label: 'Gallery',
-        props: {
-          columns: 3,
-          spacing: 'medium',
-          type: 'grid', // grid, masonry
-          class: '',
-          images: [
-            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1472214222541-d510753a4907?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=500&q=80',
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=500&q=80',
-          ],
-        },
+        id, type, label: 'Gallery',
+        props: { ids: '', style: 'grid', columns: '3', image_size: 'medium', image_hover: 'zoom', animate: '', class: '', visibility: '' },
         children: [],
       };
 
-    case 'video':
+    case 'ux_video':
       return {
-        id,
-        type,
-        label: 'Video',
-        props: {
-          url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-          aspect: '16:9',
-          autoplay: false,
-          loop: false,
-          class: '',
-        },
+        id, type, label: 'Video',
+        props: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', width: '', height: '', class: '', visibility: '' },
         children: [],
       };
 
     case 'map':
       return {
-        id,
-        type,
-        label: 'Map',
-        props: {
-          address: 'Hanoi, Vietnam',
-          zoom: 14,
-          height: '350px',
-          class: '',
-        },
+        id, type, label: 'Map',
+        props: { lat: '21.0285', long: '105.8542', height: '350px', zoom: '14', address: 'Hanoi, Vietnam', content: '', class: '', visibility: '' },
         children: [],
       };
 
     case 'gap':
       return {
-        id,
-        type,
-        label: 'Gap',
-        props: {
-          height: '30px',
-          class: '',
-        },
+        id, type, label: 'Gap',
+        props: { height: '30px', class: '', visibility: '' },
         children: [],
       };
 
     case 'divider':
       return {
-        id,
-        type,
-        label: 'Divider',
-        props: {
-          width: '100px',
-          color: '#cbd5e1',
-          thickness: '3px',
-          align: 'center',
-          style: 'solid', // solid, dashed, dotted, double
-          class: '',
-        },
+        id, type, label: 'Divider',
+        props: { width: '100px', color: '#cbd5e1', thickness: '3px', align: 'center', style: 'solid', class: '', visibility: '' },
         children: [],
       };
 
-    case 'icon':
+    case 'scroll_to':
       return {
-        id,
-        type,
-        label: 'Icon',
-        props: {
-          name: 'Heart', // Star, Shield, Smartphone, Laptop...
-          size: '40px',
-          color: '#0ea5e9',
-          bg_type: 'none', // none, circle, square
-          bg_color: '',
-          align: 'center',
-          class: '',
-        },
+        id, type, label: 'Scroll To',
+        props: { title: '', bullet: 'true', class: '' },
+        children: [],
+      };
+
+    case 'accordion':
+      return {
+        id, type, label: 'Accordion',
+        props: { title: 'Accordion', auto_open: false, open_multi: false, class: '' },
+        children: [
+          { id: generateId(), type: 'accordion-item', label: 'Item 1', props: { title: 'Item 1 Title' }, children: [createDefaultText()] },
+          { id: generateId(), type: 'accordion-item', label: 'Item 2', props: { title: 'Item 2 Title' }, children: [createDefaultText()] },
+        ],
+      };
+
+    case 'accordion-item':
+      return {
+        id, type, label: 'Accordion Item',
+        props: { title: 'Accordion Item', class: '' },
+        children: [],
+      };
+
+    case 'tabgroup':
+      return {
+        id, type, label: 'Tab Group',
+        props: { type: 'horizontal', nav_style: 'normal', nav_size: '', nav_pos: '', class: '' },
+        children: [
+          { id: generateId(), type: 'tab', label: 'Tab 1', props: { title: 'Tab 1' }, children: [createDefaultText()] },
+          { id: generateId(), type: 'tab', label: 'Tab 2', props: { title: 'Tab 2' }, children: [createDefaultText()] },
+        ],
+      };
+
+    case 'tab':
+      return {
+        id, type, label: 'Tab',
+        props: { title: 'Tab', class: '' },
+        children: [],
+      };
+
+    case 'block':
+      return {
+        id, type, label: 'Block',
+        props: { id: '', class: '' },
+        children: [],
+      };
+
+    case 'message_box':
+      return {
+        id, type, label: 'Message Box',
+        props: { bg_color: '#f0f9ff', text_color: 'dark', class: '' },
+        children: [createDefaultText()],
+      };
+
+    case 'ux_countdown':
+      return {
+        id, type, label: 'Countdown',
+        props: { date: '2025/12/31', time: '23:59', size: 'normal', bg_color: '', translucent: false, class: '' },
+        children: [],
+      };
+
+    case 'share':
+      return {
+        id, type, label: 'Share Icons',
+        props: { style: 'small', align: 'center', class: '' },
+        children: [],
+      };
+
+    case 'follow':
+      return {
+        id, type, label: 'Follow Icons',
+        props: { style: 'small', align: 'center', class: '' },
+        children: [],
+      };
+
+    case 'search':
+      return {
+        id, type, label: 'Search',
+        props: { style: 'normal', size: 'normal', class: '' },
+        children: [],
+      };
+
+    case 'ux_logo':
+      return {
+        id, type, label: 'Logo',
+        props: { img: '', image_size: 'full', link: '', target: '', depth: '', class: '' },
+        children: [],
+      };
+
+    case 'ux_image_box':
+      return {
+        id, type, label: 'Image Box',
+        props: { img: '', image_size: 'full', title: 'Image Title', text: 'Image description', link: '', target: '', image_hover: 'zoom', depth: '', text_pos: 'bottom', animate: '', class: '' },
         children: [],
       };
 
@@ -415,113 +270,147 @@ export function createElementTemplate(type: ElementType): UXElement {
   }
 }
 
-// Re-generate all IDs inside element tree to duplicate cleanly without ID clashing
-export function reassignIds(element: UXElement): UXElement {
-  const newId = generateId();
-  const children = element.children
-    ? element.children.map((child) => reassignIds(child))
-    : [];
+function createDefaultRowWithText(title: string, desc: string): UXElement {
   return {
-    ...element,
-    id: newId,
-    children,
+    id: generateId(), type: 'row', label: 'Row',
+    props: { gap: 'normal', width: '', class: '' },
+    children: [{
+      id: generateId(), type: 'col', label: 'Column',
+      props: { span: 12, text_align: 'center', padding: '15px' },
+      children: [{
+        id: generateId(), type: 'text', label: 'Text',
+        props: { text: `<h1 style="color:#ffffff;">${title}</h1><p style="color:#e2e8f0;">${desc}</p>` },
+        children: [],
+      }],
+    }],
   };
 }
 
-// Convert JSON Tree structure to Wordpress Flatsome Shortcode structure
-export function convertToShortcodes(elements: UXElement[]): string {
-  let shortcode = '';
-
-  elements.forEach((el) => {
-    const propsArr: string[] = [];
-    Object.entries(el.props).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        // format arrays safely (e.g. for gallery images)
-        if (Array.isArray(value)) {
-          propsArr.push(`${key}="${value.join(',')}"`);
-        } else {
-          propsArr.push(`${key}="${String(value).replace(/"/g, '&quot;')}"`);
-        }
-      }
-    });
-
-    const propsStr = propsArr.length > 0 ? ' ' + propsArr.join(' ') : '';
-
-    if (el.children && el.children.length > 0) {
-      shortcode += `[${el.type}${propsStr}]\n`;
-      shortcode += convertToShortcodes(el.children);
-      shortcode += `[/${el.type}]\n`;
-    } else {
-      if (el.type === 'text') {
-        shortcode += `[text${propsStr}]${el.props.text || ''}[/text]\n`;
-      } else {
-        shortcode += `[${el.type}${propsStr}]\n`;
-      }
-    }
-  });
-
-  return shortcode;
+function createDefaultText(): UXElement {
+  return { id: generateId(), type: 'text', label: 'Text', props: { text: '<p>Content here.</p>' }, children: [] };
 }
 
-// Parses string-based shortcodes into structured JSON array
-// (Provides resilient parser that understands nested structures Section -> Row -> Column)
+export function reassignIds(element: UXElement): UXElement {
+  const newId = generateId();
+  const children = element.children ? element.children.map((child) => reassignIds(child)) : [];
+  return { ...element, id: newId, children };
+}
+
+const SHORTCODE_MAP: Record<string, string> = {
+  col: 'col',
+  col_inner: 'col_inner',
+  row_inner: 'row_inner',
+  ux_banner: 'ux_banner',
+  text_box: 'text_box',
+  ux_text: 'ux_text',
+  ux_image: 'ux_image',
+  featured_box: 'featured_box',
+  ux_slider: 'ux_slider',
+  ux_gallery: 'ux_gallery',
+  ux_video: 'ux_video',
+  ux_logo: 'ux_logo',
+  ux_image_box: 'ux_image_box',
+  ux_countdown: 'ux_countdown',
+  scroll_to: 'scroll_to',
+  accordion: 'accordion',
+  'accordion-item': 'accordion-item',
+  tabgroup: 'tabgroup',
+  tab: 'tab',
+  message_box: 'message_box',
+  block: 'block',
+  share: 'share',
+  follow: 'follow',
+  search: 'search',
+  section: 'section',
+  row: 'row',
+  text: 'text',
+  button: 'button',
+  map: 'map',
+  gap: 'gap',
+  divider: 'divider',
+  title: 'title',
+};
+
+export function convertToShortcodes(elements: UXElement[]): string {
+  let output = '';
+  for (const el of elements) {
+    const tag = SHORTCODE_MAP[el.type] || el.type;
+    const attrs: string[] = [];
+    for (const [key, value] of Object.entries(el.props)) {
+      if (value === undefined || value === null || value === '' || key === 'class' || key === 'visibility') continue;
+      if (key === 'text' && el.type === 'text') continue;
+      const encoded = Array.isArray(value) ? value.join(',') : String(value).replace(/"/g, '&quot;');
+      attrs.push(`${key}="${encoded}"`);
+    }
+    const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : '';
+    const isSelfClosing = FLATSOME_SELF_CLOSING.includes(el.type);
+    if (isSelfClosing || (!el.children || el.children.length === 0)) {
+      if (el.type === 'text') {
+        output += `[text${attrStr}]${el.props.text || ''}[/text]\n`;
+      } else {
+        output += `[${tag}${attrStr}]\n`;
+      }
+    } else {
+      output += `[${tag}${attrStr}]\n`;
+      output += convertToShortcodes(el.children);
+      output += `[/${tag}]\n`;
+    }
+  }
+  return output;
+}
+
+const OPEN_TYPES = ['section', 'row', 'row_inner', 'col', 'col_inner', 'ux_banner', 'text_box', 'text', 'ux_text', 'ux_slider', 'ux_gallery', 'accordion', 'accordion-item', 'tabgroup', 'tab', 'featured_box', 'message_box'];
+
 export function parseShortcodes(text: string): UXElement[] {
-  // A resilient state machine parser to decode flatsome codes
   const result: UXElement[] = [];
-  const lines = text.split('\n');
-
-  // Let's create an elegant parser that parses typical tags.
-  // We'll write a nested stack-based tag compiler.
   const stack: UXElement[] = [];
-
-  // Match: [tag_name attr1="val" attr2="val"] or [/tag_name]
-  const tagRegex = /\[(\/)?([a-zA-Z0-9_]+)([^\]]*)\]/g;
-
-  // For a reliable parser, we can parse the whole string sequentially. Let's do it token by token!
+  const tagRegex = /\[(\/)?([a-zA-Z0-9_-]+)([^\]]*)\]/g;
   let lastIndex = 0;
   let match;
 
+  const reverseMap: Record<string, ElementType> = {};
+  for (const [internal, sc] of Object.entries(SHORTCODE_MAP)) {
+    reverseMap[sc] = internal as ElementType;
+  }
+  for (const [internal, sc] of Object.entries(SHORTCODE_MAP)) {
+    if (!reverseMap[internal]) reverseMap[internal] = internal as ElementType;
+  }
+
   while ((match = tagRegex.exec(text)) !== null) {
     const isClosing = !!match[1];
-    const type = match[2].toLowerCase() as ElementType;
+    const rawType = match[2].toLowerCase();
     const propsString = match[3] || '';
     const startIdx = match.index;
 
-    // Handle intermediate raw text (especially for [text] content)
+    const type = reverseMap[rawType] || (rawType as ElementType);
+    const tag = SHORTCODE_MAP[type] || type;
+
     if (stack.length > 0 && lastIndex < startIdx) {
       const betweenText = text.substring(lastIndex, startIdx).trim();
       const parent = stack[stack.length - 1];
-      if (parent && parent.type === 'text' && betweenText) {
+      if (parent && (parent.type === 'text' || parent.type === 'ux_text') && betweenText) {
         parent.props.text = (parent.props.text || '') + betweenText;
       }
     }
 
     if (!isClosing) {
-      // Parse props
       const props: Record<string, any> = {};
       const attrRegex = /([a-zA-Z0-9_-]+)="([^"]*)"/g;
       let attrMatch;
       while ((attrMatch = attrRegex.exec(propsString)) !== null) {
         const key = attrMatch[1];
         let val: any = attrMatch[2];
-        if (key === 'images') {
-          val = val.split(',');
-        } else if (val === 'true') {
-          val = true;
-        } else if (val === 'false') {
-          val = false;
-        } else if (!isNaN(Number(val)) && val.trim() !== '') {
-          val = Number(val);
-        }
+        if (val === 'true') val = true;
+        else if (val === 'false') val = false;
+        else if (!isNaN(Number(val)) && val.trim() !== '') val = Number(val);
         props[key] = val;
       }
 
-      // Default label or assign from template
       const template = createElementTemplate(type);
       const newElement: UXElement = {
         id: generateId(),
         type,
-        label: type.charAt(0).toUpperCase() + type.slice(1),
+        label: type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' '),
         props: { ...template.props, ...props },
         children: [],
       };
@@ -532,312 +421,87 @@ export function parseShortcodes(text: string): UXElement[] {
         result.push(newElement);
       }
 
-      // If it has closing tag or is a block container, push it to stack
-      const openTypes = ['section', 'row', 'column', 'slider', 'gallery', 'text'];
-      if (openTypes.includes(type)) {
+      if (OPEN_TYPES.includes(type)) {
         stack.push(newElement);
       }
     } else {
-      // Closing tag: pop from stack
       if (stack.length > 0 && stack[stack.length - 1].type === type) {
         stack.pop();
       }
     }
-
     lastIndex = tagRegex.lastIndex;
   }
 
-  // If stack remains, safely pop them
   if (result.length === 0 && text.trim().length > 0) {
-    // Generate fallback template
     const section = createElementTemplate('section');
-    section.children[0].children[0].children = [
-      {
-        id: generateId(),
-        type: 'text',
-        label: 'Text',
-        props: { text: text },
-        children: [],
-      },
-    ];
+    const row = section.children[0];
+    const col = row.children[0];
+    col.children = [{ id: generateId(), type: 'text', label: 'Text', props: { text: text }, children: [] }];
     return [section];
   }
 
   return result.length > 0 ? result : getDefaultLayout();
 }
 
-// Starting Mock Standard Template for UX Builder
 export function getDefaultLayout(): UXElement[] {
-  const sectionId1 = generateId();
-  const rowId1 = generateId();
-  const colId1 = generateId();
-  const colId2 = generateId();
-
   return [
     {
-      id: sectionId1,
-      type: 'section',
-      label: 'Hero Section',
-      props: {
-        bg_color: '#0f172a',
-        bg_image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1600&q=80',
-        padding_top: '120px',
-        padding_bottom: '120px',
-        overlay: 'rgba(15, 23, 42, 0.85)',
-        border_width: '0px',
-        border_color: '',
-        class: '',
-      },
-      children: [
-        {
-          id: rowId1,
-          type: 'row',
-          label: 'Brand row',
-          props: {
-            gutter: 'large',
-            width: 'container',
-            class: '',
-          },
+      id: generateId(), type: 'section', label: 'Hero Section',
+      props: { bg_color: '#0f172a', bg: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1600&q=80', bg_overlay: 'rgba(15, 23, 42, 0.85)', padding: '120px 0px 120px 0px', dark: true, class: '' },
+      children: [{
+        id: generateId(), type: 'row', label: 'Hero Row',
+        props: { gap: 'normal', h_align: 'center', v_align: 'middle', class: '' },
+        children: [{
+          id: generateId(), type: 'col', label: 'Hero Content',
+          props: { span: 12, text_align: 'center', text_color: 'light', padding: '0px', animate: 'fadeIn', class: '' },
           children: [
-            {
-              id: colId1,
-              type: 'column',
-              label: 'Hero Content',
-              props: {
-                span: 7,
-                bg_color: '',
-                padding: '0px',
-                text_align: 'left',
-                animation: 'fade-in',
-                class: '',
-              },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'icon',
-                  label: 'Logo Icon',
-                  props: {
-                    name: 'Cpu',
-                    size: '48px',
-                    color: '#38bdf8',
-                    bg_type: 'none',
-                    align: 'left',
-                  },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'text',
-                  label: 'Heading',
-                  props: {
-                    text: '<h1 style="color:#ffffff; font-size:48px; line-height:1.1; margin-top:20px; font-weight:800; letter-spacing:-0.03em;">Supercharge WooCommerce with Flatsome</h1><p style="color:#94a3b8; font-size:18px; margin-top:16px; margin-bottom:24px; line-height:1.6;">The ultimate responsive Web & Layout Builder. Reorder grids, slider frames, banners, and map nodes visually in 60fps local rendering.</p>',
-                    class: '',
-                  },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'button',
-                  label: 'Button Primary',
-                  props: {
-                    text: 'GET CUSTOM BUILDER',
-                    link: '#',
-                    color: 'success',
-                    style: 'filled',
-                    size: 'large',
-                    align: 'left',
-                  },
-                  children: [],
-                },
-              ],
-            },
-            {
-              id: colId2,
-              type: 'column',
-              label: 'Visual Frame',
-              props: {
-                span: 5,
-                bg_color: '',
-                padding: '10px',
-                text_align: 'center',
-                animation: 'slide-up',
-                class: '',
-              },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'image',
-                  label: 'Device Mockup',
-                  props: {
-                    url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80',
-                    width: '100%',
-                    height: 'auto',
-                    align: 'center',
-                    radius: '12px',
-                    hover_effect: 'zoom',
-                  },
-                  children: [],
-                },
-              ],
-            },
+            { id: generateId(), type: 'text', label: 'Heading', props: { text: '<h1 style="font-size:48px;font-weight:800;letter-spacing:-0.03em;color:#ffffff;">Supercharge Your Site with Flatsome</h1><p style="font-size:18px;color:#94a3b8;margin-top:16px;">The ultimate drag-and-drop UX Builder for WooCommerce.</p>' }, children: [] },
+            { id: generateId(), type: 'button', label: 'Button', props: { text: 'Get Started', link: '#', color: 'primary', size: 'large', radius: '99', class: '' }, children: [] },
           ],
-        },
-      ],
+        }],
+      }],
     },
     {
-      id: generateId(),
-      type: 'section',
-      label: 'Feature Section',
-      props: {
-        bg_color: '#ffffff',
-        padding_top: '80px',
-        padding_bottom: '80px',
-        overlay: 'rgba(0,0,0,0)',
-        border_width: '1px',
-        border_color: '#e2e8f0',
-      },
-      children: [
-        {
-          id: generateId(),
-          type: 'row',
-          label: 'Grid Header',
-          props: { gutter: 'medium', width: 'container' },
+      id: generateId(), type: 'section', label: 'Features',
+      props: { bg_color: '#ffffff', padding: '80px 0px 80px 0px', class: '' },
+      children: [{
+        id: generateId(), type: 'row', label: 'Title Row',
+        props: { gap: 'normal', class: '' },
+        children: [{
+          id: generateId(), type: 'col', label: 'Title Col',
+          props: { span: 12, text_align: 'center', padding: '15px' },
           children: [
-            {
-              id: generateId(),
-              type: 'column',
-              label: 'Header Col',
-              props: { span: 12, text_align: 'center' },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'text',
-                  label: 'Introduction Text',
-                  props: {
-                    text: '<h2 style="font-size:32px; font-weight:700; color:#0f172a;">Drag-and-Drop Power Suite</h2><p style="color:#64748b; margin-top:4px; max-width:600px; margin-left:auto; margin-right:auto;">Discover standard elements you can place, re-nest, delete, and duplicate in our layout navigator.</p>',
-                  },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'divider',
-                  label: 'Divider accent',
-                  props: {
-                    width: '60px',
-                    color: '#3b82f6',
-                    thickness: '4px',
-                    align: 'center',
-                    style: 'solid',
-                  },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'gap',
-                  label: 'Gap small',
-                  props: { height: '30px' },
-                  children: [],
-                },
-              ],
-            },
+            { id: generateId(), type: 'title', label: 'Title', props: { text: 'Powerful Features', style: 'lined', size: 'normal', class: '' }, children: [] },
+            { id: generateId(), type: 'gap', label: 'Gap', props: { height: '20px' }, children: [] },
           ],
-        },
-        {
-          id: generateId(),
-          type: 'row',
-          label: 'Feature Features',
-          props: { gutter: 'medium', width: 'container' },
-          children: [
-            {
-              id: generateId(),
-              type: 'column',
-              label: 'Card Left',
-              props: {
-                span: 4,
-                bg_color: '#f8fafc',
-                padding: '30px',
-                class: 'border border-slate-100 rounded-xl hover:shadow-lg transition-all',
-              },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'icon',
-                  label: 'Fast Icon',
-                  props: { name: 'Zap', size: '36px', color: '#eab308', align: 'left' },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'text',
-                  label: 'Fast Title',
-                  props: {
-                    text: '<h4 style="font-size:18px; font-weight:600; color:#0f172a; margin-top:12px;">Ultra-fast React State</h4><p style="color:#64748b; font-size:14px; margin-top:8px;">Instant state dispatch keeps FPS at absolute maximum while editing complex nested layouts.</p>',
-                  },
-                  children: [],
-                },
-              ],
-            },
-            {
-              id: generateId(),
-              type: 'column',
-              label: 'Card Center',
-              props: {
-                span: 4,
-                bg_color: '#f8fafc',
-                padding: '30px',
-                class: 'border border-slate-100 rounded-xl hover:shadow-lg transition-all',
-              },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'icon',
-                  label: 'Customizer Icon',
-                  props: { name: 'Sliders', size: '36px', color: '#10b981', align: 'left' },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'text',
-                  label: 'Customizer Title',
-                  props: {
-                    text: '<h4 style="font-size:18px; font-weight:600; color:#0f172a; margin-top:12px;">Unlimited Presets</h4><p style="color:#64748b; font-size:14px; margin-top:8px;">Control columns width, padding buffers, backgrounds, overlay filters, and border curves easily.</p>',
-                  },
-                  children: [],
-                },
-              ],
-            },
-            {
-              id: generateId(),
-              type: 'column',
-              label: 'Card Right',
-              props: {
-                span: 4,
-                bg_color: '#f8fafc',
-                padding: '30px',
-                class: 'border border-slate-100 rounded-xl hover:shadow-lg transition-all',
-              },
-              children: [
-                {
-                  id: generateId(),
-                  type: 'icon',
-                  label: 'Responsive Icon',
-                  props: { name: 'Smartphone', size: '36px', color: '#3b82f6', align: 'left' },
-                  children: [],
-                },
-                {
-                  id: generateId(),
-                  type: 'text',
-                  label: 'Responsive Title',
-                  props: {
-                    text: '<h4 style="font-size:18px; font-weight:600; color:#0f172a; margin-top:12px;">100% Mobile Ready</h4><p style="color:#64748b; font-size:14px; margin-top:8px;">Viewport swapper replicates device grids so your clients get perfect mobile viewports.</p>',
-                  },
-                  children: [],
-                },
-              ],
-            },
-          ],
-        },
-      ],
+        }],
+      }, {
+        id: generateId(), type: 'row', label: 'Features Row',
+        props: { gap: 'normal', class: '' },
+        children: [
+          {
+            id: generateId(), type: 'col', label: 'Feature 1',
+            props: { span: 4, span__sm: 12, padding: '15px', text_align: 'center' },
+            children: [
+              { id: generateId(), type: 'featured_box', label: 'Feature 1', props: { icon: 'Zap', icon_color: '#eab308', icon_size: '36px', pos: 'top', title: 'Fast Performance', text: 'Optimized for speed and performance.' }, children: [] },
+            ],
+          },
+          {
+            id: generateId(), type: 'col', label: 'Feature 2',
+            props: { span: 4, span__sm: 12, padding: '15px', text_align: 'center' },
+            children: [
+              { id: generateId(), type: 'featured_box', label: 'Feature 2', props: { icon: 'Sliders', icon_color: '#10b981', icon_size: '36px', pos: 'top', title: 'Customizable', text: 'Endless customization options.' }, children: [] },
+            ],
+          },
+          {
+            id: generateId(), type: 'col', label: 'Feature 3',
+            props: { span: 4, span__sm: 12, padding: '15px', text_align: 'center' },
+            children: [
+              { id: generateId(), type: 'featured_box', label: 'Feature 3', props: { icon: 'Smartphone', icon_color: '#3b82f6', icon_size: '36px', pos: 'top', title: 'Responsive', text: 'Looks great on all devices.' }, children: [] },
+            ],
+          },
+        ],
+      }],
     },
   ];
 }
