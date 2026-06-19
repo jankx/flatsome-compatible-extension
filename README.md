@@ -1,20 +1,28 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Flatsome Compatible - UX Builder for Jankx Theme
 
-# Run and deploy your AI Studio app
+Flatsome-style drag-and-drop UX Builder tích hợp vào Jankx Theme, giúp người dùng thiết kế layout trực quan.
 
-This contains everything you need to run your app locally.
+## Yêu cầu
 
-View your app in AI Studio: https://ai.studio/apps/084e02d3-d073-4a75-9dcb-4771be3bea1e
+- WordPress 5.8+
+- Jankx Theme 2.0+
+- PHP 7.4+
+- Node.js 18+ (để build frontend)
 
-## Run Locally
+## Cài đặt
 
-**Prerequisites:**  Node.js
+Extension được tự động phát hiện bởi Jankx Theme Extension Manager.
 
+### Build frontend
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+cd wp-content/themes/jankx/extensions/flatsome-compatible
+npm install
+npm run build:wp
+```
+
+## REST API
+
+- `GET /wp-json/jankx/ux-builder/v1/layout` - Lấy layout hiện tại
+- `POST /wp-json/jankx/ux-builder/v1/layout` - Lưu layout
+- `GET /wp-json/jankx/ux-builder/v1/element-types` - Danh sách element types
