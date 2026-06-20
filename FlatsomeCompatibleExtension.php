@@ -70,17 +70,108 @@ class FlatsomeCompatibleExtension extends AbstractExtension
         add_action('admin_menu', function () {
             $page = new UxBuilderPage($this->uxBuilderService);
             $page->register();
+            $this->addUxBlocksSubmenu();
         });
 
         add_action('rest_api_init', function () {
             $this->registerRestRoutes();
         });
 
+        add_filter('page_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
+        add_filter('post_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
+
+        add_action('init', [$this, 'registerUxBlockPostType']);
+
         add_filter('jankx/ux-builder/element-types', function ($types) {
             return apply_filters('jankx/ux-builder/registered-element-types', $types);
         });
 
         do_action('jankx/ux-builder/hooks-registered', $this);
+    }
+
+    public function addEditWithUxBuilderLink(array $actions, \WP_Post $post): array
+    {
+        $supported = apply_filters('jankx/ux-builder/supported-post-types', ['page', 'post', 'blocks']);
+
+        if (!in_array($post->post_type, $supported, true)) {
+            return $actions;
+        }
+
+        if (!current_user_can('edit_theme_options')) {
+            return $actions;
+        }
+
+        $editUrl = admin_url('admin.php?page=jankx-ux-builder&post_id=' . $post->ID);
+        $actions['edit_with_ux_builder'] = sprintf(
+            '<a href="%s" style="color:#8b5cf6;font-weight:600;">%s</a>',
+            esc_url($editUrl),
+            __('Edit with UX Builder', 'jankx')
+        );
+
+        return $actions;
+    }
+
+    public function registerUxBlockPostType(): void
+    {
+        $labels = [
+            'name'                  => __('UX Blocks', 'jankx'),
+            'singular_name'         => __('UX Block', 'jankx'),
+            'add_new'               => __('Add New Block', 'jankx'),
+            'add_new_item'          => __('Add New UX Block', 'jankx'),
+            'edit_item'             => __('Edit UX Block', 'jankx'),
+            'new_item'              => __('New UX Block', 'jankx'),
+            'view_item'             => __('View UX Block', 'jankx'),
+            'search_items'          => __('Search UX Blocks', 'jankx'),
+            'not_found'             => __('No UX Blocks found', 'jankx'),
+            'not_found_in_trash'    => __('No UX Blocks found in Trash', 'jankx'),
+            'all_items'             => __('All UX Blocks', 'jankx'),
+            'menu_name'             => __('UX Blocks', 'jankx'),
+        ];
+
+        $args = [
+            'labels'              => $labels,
+            'public'              => false,
+            'show_ui'             => true,
+            'show_in_menu'        => false,
+            'show_in_nav_menus'   => false,
+            'show_in_admin_bar'   => false,
+            'rewrite'             => false,
+            'query_var'           => false,
+            'capability_type'     => ['ux_block', 'ux_blocks'],
+            'capabilities'        => [
+                'edit_post'          => 'edit_theme_options',
+                'read_post'          => 'edit_theme_options',
+                'delete_post'        => 'edit_theme_options',
+                'edit_posts'         => 'edit_theme_options',
+                'edit_others_posts'  => 'edit_theme_options',
+                'publish_posts'      => 'edit_theme_options',
+                'read_private_posts' => 'edit_theme_options',
+                'delete_posts'       => 'edit_theme_options',
+                'delete_private_posts' => 'edit_theme_options',
+                'delete_published_posts' => 'edit_theme_options',
+                'delete_others_posts' => 'edit_theme_options',
+                'edit_private_posts' => 'edit_theme_options',
+                'edit_published_posts' => 'edit_theme_options',
+                'create_posts'      => 'edit_theme_options',
+            ],
+            'menu_icon'           => 'dashicons-layout',
+            'supports'            => ['title', 'editor', 'revisions'],
+            'show_in_rest'        => true,
+            'rest_base'           => 'ux-blocks',
+        ];
+
+        register_post_type('ux_block', $args);
+    }
+
+    protected function addUxBlocksSubmenu(): void
+    {
+        add_submenu_page(
+            'jankx-ux-builder',
+            __('All UX Blocks', 'jankx'),
+            __('All UX Blocks', 'jankx'),
+            'edit_theme_options',
+            'edit.php?post_type=ux_block'
+        );
     }
 
     protected function registerRestRoutes(): void
@@ -110,7 +201,17 @@ class FlatsomeCompatibleExtension extends AbstractExtension
 
     public function getLayout(\WP_REST_Request $request)
     {
-        $layout = get_option('jankx_ux_builder_layout', $this->uxBuilderService->getDefaultLayout());
+        $postId = $request->get_param('post_id');
+        $layout = null;
+
+        if ($postId) {
+            $layout = get_post_meta($postId, '_jankx_ux_builder_layout', true);
+        }
+
+        if (!$layout) {
+            $layout = get_option('jankx_ux_builder_layout', $this->uxBuilderService->getDefaultLayout());
+        }
+
         return rest_ensure_response([
             'success' => true,
             'data' => $layout,
@@ -120,6 +221,8 @@ class FlatsomeCompatibleExtension extends AbstractExtension
     public function saveLayout(\WP_REST_Request $request)
     {
         $layout = $request->get_param('layout');
+        $postId = $request->get_param('post_id');
+
         if (!is_array($layout)) {
             return rest_ensure_response([
                 'success' => false,
@@ -128,8 +231,14 @@ class FlatsomeCompatibleExtension extends AbstractExtension
         }
 
         $layout = apply_filters('jankx/ux-builder/before-save-layout', $layout);
-        update_option('jankx_ux_builder_layout', $layout);
-        do_action('jankx/ux-builder/layout-saved', $layout);
+
+        if ($postId) {
+            update_post_meta($postId, '_jankx_ux_builder_layout', $layout);
+        } else {
+            update_option('jankx_ux_builder_layout', $layout);
+        }
+
+        do_action('jankx/ux-builder/layout-saved', $layout, $postId);
 
         return rest_ensure_response([
             'success' => true,
