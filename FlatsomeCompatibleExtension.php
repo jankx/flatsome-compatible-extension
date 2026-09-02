@@ -41,13 +41,6 @@ class FlatsomeCompatibleExtension extends AbstractExtension
     public function init(): void
     {
         self::$instance = $this;
-
-        $this->uxBuilderService = UxBuilderService::getInstance(
-            $this->get_extension_path(),
-            $this->get_extension_url()
-        );
-
-        do_action('jankx/ux-builder/loaded', $this);
     }
 
     public static function get_instance(): ?self
@@ -67,6 +60,13 @@ class FlatsomeCompatibleExtension extends AbstractExtension
 
     public function register_hooks(): void
     {
+        $this->uxBuilderService = UxBuilderService::getInstance(
+            $this->get_extension_path(),
+            $this->get_extension_url()
+        );
+
+        add_action('admin_init', [$this, 'maybeRedirectToUxBuilder']);
+
         add_action('admin_menu', function () {
             $page = new UxBuilderPage($this->uxBuilderService);
             $page->register();
@@ -79,6 +79,8 @@ class FlatsomeCompatibleExtension extends AbstractExtension
 
         add_filter('page_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
         add_filter('post_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
+
+        add_action('admin_footer-edit.php', [$this, 'addUxBuilderNewPageButton']);
 
         add_action('init', [$this, 'registerUxBlockPostType']);
 
@@ -101,7 +103,7 @@ class FlatsomeCompatibleExtension extends AbstractExtension
             return $actions;
         }
 
-        $editUrl = admin_url('admin.php?page=jankx-ux-builder&post_id=' . $post->ID);
+        $editUrl = admin_url('post.php?post=' . $post->ID . '&action=edit&jankx-ux-builder=true');
         $actions['edit_with_ux_builder'] = sprintf(
             '<a href="%s" style="color:#8b5cf6;font-weight:600;">%s</a>',
             esc_url($editUrl),
@@ -109,6 +111,50 @@ class FlatsomeCompatibleExtension extends AbstractExtension
         );
 
         return $actions;
+    }
+
+    public function addUxBuilderNewPageButton(): void
+    {
+        $screen = get_current_screen();
+        if (!$screen || $screen->id !== 'edit-page') {
+            return;
+        }
+
+        if (!current_user_can('edit_theme_options')) {
+            return;
+        }
+
+        $uxBuilderUrl = add_query_arg('jankx-ux-builder', '1', admin_url('post-new.php?post_type=page'));
+        ?>
+        <script type="text/javascript">
+        (function($) {
+            var $button = $('<a href="<?php echo esc_url($uxBuilderUrl); ?>" class="page-title-action" style="color:#8b5cf6;font-weight:600;"><?php echo esc_html__('Add New with UX Builder', 'jankx'); ?></a>');
+            $('.page-title-action').last().after($button);
+        })(jQuery);
+        </script>
+        <?php
+    }
+
+    public function maybeRedirectToUxBuilder(): void
+    {
+        if (!isset($_GET['jankx-ux-builder']) || !is_admin()) {
+            return;
+        }
+
+        if (!current_user_can('edit_theme_options')) {
+            return;
+        }
+
+        $params = ['page' => 'jankx-ux-builder'];
+
+        if (isset($_GET['post_id'])) {
+            $params['post_id'] = intval($_GET['post_id']);
+        } elseif (isset($_GET['post']) && isset($_GET['action']) && $_GET['action'] === 'edit') {
+            $params['post_id'] = intval($_GET['post']);
+        }
+
+        wp_safe_redirect(admin_url('admin.php?' . http_build_query($params)));
+        exit;
     }
 
     public function registerUxBlockPostType(): void
