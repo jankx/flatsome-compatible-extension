@@ -2,6 +2,7 @@
 namespace Jankx\Extensions\FlatsomeCompatible;
 
 use Jankx\Extensions\AbstractExtension;
+use Jankx\Extensions\FlatsomeCompatible\Actions\EditorActions;
 use Jankx\Extensions\FlatsomeCompatible\Admin\UxBuilderPage;
 use Jankx\Extensions\FlatsomeCompatible\Services\UxBuilderService;
 use Jankx\Extensions\FlatsomeCompatible\Registry\ElementTypeRegistry;
@@ -11,6 +12,7 @@ class FlatsomeCompatibleExtension extends AbstractExtension
     protected static $instance;
 
     protected $uxBuilderService;
+    protected $editorActions;
 
     public function __construct()
     {
@@ -65,7 +67,8 @@ class FlatsomeCompatibleExtension extends AbstractExtension
             $this->get_extension_url()
         );
 
-        add_action('admin_init', [$this, 'maybeRedirectToUxBuilder']);
+        $this->editorActions = new EditorActions($this->uxBuilderService);
+        $this->editorActions->register();
 
         add_action('admin_menu', function () {
             $page = new UxBuilderPage($this->uxBuilderService);
@@ -77,11 +80,6 @@ class FlatsomeCompatibleExtension extends AbstractExtension
             $this->registerRestRoutes();
         });
 
-        add_filter('page_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
-        add_filter('post_row_actions', [$this, 'addEditWithUxBuilderLink'], 10, 2);
-
-        add_action('admin_footer-edit.php', [$this, 'addUxBuilderNewPageButton']);
-
         add_action('init', [$this, 'registerUxBlockPostType']);
 
         add_filter('jankx/ux-builder/element-types', function ($types) {
@@ -89,72 +87,6 @@ class FlatsomeCompatibleExtension extends AbstractExtension
         });
 
         do_action('jankx/ux-builder/hooks-registered', $this);
-    }
-
-    public function addEditWithUxBuilderLink(array $actions, \WP_Post $post): array
-    {
-        $supported = apply_filters('jankx/ux-builder/supported-post-types', ['page', 'post', 'blocks']);
-
-        if (!in_array($post->post_type, $supported, true)) {
-            return $actions;
-        }
-
-        if (!current_user_can('edit_theme_options')) {
-            return $actions;
-        }
-
-        $editUrl = admin_url('post.php?post=' . $post->ID . '&action=edit&jankx-ux-builder=true');
-        $actions['edit_with_ux_builder'] = sprintf(
-            '<a href="%s" style="color:#8b5cf6;font-weight:600;">%s</a>',
-            esc_url($editUrl),
-            __('Edit with UX Builder', 'jankx')
-        );
-
-        return $actions;
-    }
-
-    public function addUxBuilderNewPageButton(): void
-    {
-        $screen = get_current_screen();
-        if (!$screen || $screen->id !== 'edit-page') {
-            return;
-        }
-
-        if (!current_user_can('edit_theme_options')) {
-            return;
-        }
-
-        $uxBuilderUrl = add_query_arg('jankx-ux-builder', '1', admin_url('post-new.php?post_type=page'));
-        ?>
-        <script type="text/javascript">
-        (function($) {
-            var $button = $('<a href="<?php echo esc_url($uxBuilderUrl); ?>" class="page-title-action" style="color:#8b5cf6;font-weight:600;"><?php echo esc_html__('Add New with UX Builder', 'jankx'); ?></a>');
-            $('.page-title-action').last().after($button);
-        })(jQuery);
-        </script>
-        <?php
-    }
-
-    public function maybeRedirectToUxBuilder(): void
-    {
-        if (!isset($_GET['jankx-ux-builder']) || !is_admin()) {
-            return;
-        }
-
-        if (!current_user_can('edit_theme_options')) {
-            return;
-        }
-
-        $params = ['page' => 'jankx-ux-builder'];
-
-        if (isset($_GET['post_id'])) {
-            $params['post_id'] = intval($_GET['post_id']);
-        } elseif (isset($_GET['post']) && isset($_GET['action']) && $_GET['action'] === 'edit') {
-            $params['post_id'] = intval($_GET['post']);
-        }
-
-        wp_safe_redirect(admin_url('admin.php?' . http_build_query($params)));
-        exit;
     }
 
     public function registerUxBlockPostType(): void
